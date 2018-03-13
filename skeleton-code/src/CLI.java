@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Optional;
 
 /**
  * @author Kelsey McKenna
@@ -30,17 +31,20 @@ public class CLI {
     }
 
     public static void main(String[] args) throws IOException {
+    	
         System.out.print("Loading dictionary ... ");
         DictionaryTree d = loadWords(new File(args[0]));
         System.out.println("done");
-
-        System.out.println("Enter prefixes for prediction below.");
-
+    	System.out.println("Enter prefixes for prediction below.");
+     	
         try (BufferedReader fromUser = new BufferedReader(new InputStreamReader(System.in))) {
-            while (true) {
-                System.out.println("---> " + d.predict(fromUser.readLine()));
+        	System.out.println(d.size());
+            
+            for (int i = 0; i < 210; i++) {
+            	Optional<String> out = d.predict(fromUser.readLine());
+            	System.out.println(out.isPresent() ? out.get() : "No prediction");
             }
-        }
+        }  
     }
 
 }

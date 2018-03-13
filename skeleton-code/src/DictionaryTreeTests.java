@@ -18,5 +18,17 @@ public class DictionaryTreeTests {
         unit.insert("word", 0);
         Assertions.assertEquals("word".length(), unit.height());
     }
+    
+    @Test
+    public void testSize() {
+        DictionaryTree unit = new DictionaryTree();
+        unit.insert("hello");
+        unit.insert("hey");
+        unit.insert("at");
+        unit.insert("atlas");
+        unit.insert("attention");
+        Assertions.assertEquals(unit.size(), 24);
+    }
+    
 
 }

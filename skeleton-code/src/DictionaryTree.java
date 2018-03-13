@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -8,6 +9,8 @@ import java.util.function.BiFunction;
 public class DictionaryTree {
 
     private Map<Character, DictionaryTree> children = new LinkedHashMap<>();
+    private final static String WORD_PATTERN 	= "[A-Za-z]*";
+    private final static char END_OF_WORD = '#';
 
     /**
      * Inserts the given word into this dictionary.
@@ -16,7 +19,27 @@ public class DictionaryTree {
      * @param word the word to insert
      */
     void insert(String word) {
-        throw new RuntimeException("DictionaryTree.insert not implemented yet");
+    	assert(word != null);
+    	assert(word.matches(WORD_PATTERN));
+    	word = word.toLowerCase() + END_OF_WORD;
+    	DictionaryTree currentTree = this;
+    	int i = 0;
+    	while (i < word.length()) {
+    		char c = word.charAt(i);
+    		if (currentTree.getChildren().containsKey(c)) {
+    			currentTree = currentTree.getChildren().get(c);
+    			i++;
+    		} else {
+    			break;
+    		}
+    	}
+    	while (i < word.length()) {
+    		DictionaryTree newTree = new DictionaryTree();		
+    		currentTree.getChildren().put(word.charAt(i), newTree); 		
+    		currentTree = newTree;
+    		i++;
+    	}
+    	
     }
 
     /**
@@ -50,7 +73,20 @@ public class DictionaryTree {
      * @return true if the specified word is stored in this tree; false otherwise
      */
     boolean contains(String word) {
-        throw new RuntimeException("DictionaryTree.contains not implemented yet");
+    	assert(word != null);
+    	word = word + END_OF_WORD;
+     	DictionaryTree currentTree = this;
+     	int i = 0;
+       	while (i < word.length()) {
+    		char c = word.charAt(i);
+    		if (currentTree.getChildren().containsKey(c)) {
+    			currentTree = currentTree.getChildren().get(c);
+    			i++;
+    		} else {
+    			return false;
+    		}
+    	}
+       	return true;
     }
 
     /**
@@ -59,8 +95,24 @@ public class DictionaryTree {
      * if no such word is found.
      */
     Optional<String> predict(String prefix) {
-        throw new RuntimeException("DictionaryTree.predict not implemented yet");
+    	assert(prefix != null);
+    	assert(prefix.matches(WORD_PATTERN));
+    	prefix = prefix.toLowerCase();
+    	DictionaryTree currentTree = this;
+    	int i = 0;
+    	while (i < prefix.length()) {
+    		char c = prefix.charAt(i);
+    		if (currentTree.getChildren().containsKey(c)) {
+    			currentTree = currentTree.getChildren().get(c);
+    			i++;
+    		} else {
+    			return Optional.empty();
+    		}
+    	}
+    	return Optional.of(prefix + currentTree.allWords().get(0));
+    	
     }
+
 
     /**
      * Predicts the (at most) n most popular full English words based on the specified prefix.
@@ -99,7 +151,15 @@ public class DictionaryTree {
      * @return the number of nodes in this tree
      */
     int size() {
-        throw new RuntimeException("DictionaryTree.size not implemented yet");
+        int size = 1;
+        for (DictionaryTree d : children.values()) {
+        	size += d.size();
+        }
+        return size;
+    }
+    
+    Map<Character, DictionaryTree> getChildren() {
+    	return children;
     }
 
     /**
@@ -113,8 +173,21 @@ public class DictionaryTree {
      * @return all words stored in this tree as a list
      */
     List<String> allWords() {
-        throw new RuntimeException("DictionaryTree.allWords not implemented yet");
+    	List<String> words = new ArrayList<String>();
+        allWordsRecur("", words);
+        return words;
     }
+    
+    void allWordsRecur(String soFar, List<String> words) {
+        for (Character c: children.keySet()) {
+        	if (c == END_OF_WORD) {
+        		words.add(soFar);
+        	} else {
+            	children.get(c).allWordsRecur(soFar + c, words);
+        	}
+        }
+    }
+    
 
     /**
      * Folds the tree using the given function. Each of this node's
