@@ -27,7 +27,46 @@ public class DictionaryTreeTests {
         unit.insert("at");
         unit.insert("atlas");
         unit.insert("attention");
-        Assertions.assertEquals(unit.size(), 24);
+        Assertions.assertEquals(unit.size(), 19);
+    }
+    
+    @Test
+    public void testHeight() {
+        DictionaryTree unit = new DictionaryTree();
+        unit.insert("hello");
+        unit.insert("hey");
+        unit.insert("at");
+        unit.insert("atlas");
+        unit.insert("attention");
+        System.out.println(unit.size());
+        Assertions.assertEquals(unit.height(), 9);
+    }
+    
+    @Test
+    public void testContains() {
+        DictionaryTree unit = new DictionaryTree();
+        unit.insert("hello");
+        unit.insert("hey");
+        unit.insert("at");
+        unit.insert("atlas");
+        unit.insert("attention");
+        System.out.println(unit.size());
+        Assertions.assertEquals(unit.contains("attention"), true);
+        Assertions.assertEquals(unit.contains("blam"), false);
+    }
+    
+    @Test
+    public void testRemove() {
+        DictionaryTree unit = new DictionaryTree();
+        unit.insert("hello");
+        unit.insert("hey");
+        unit.insert("at");
+        unit.insert("atlas");
+        unit.insert("attention");
+        System.out.println(unit.size());
+        Assertions.assertEquals(unit.contains("atlas"), true);
+        unit.remove("atlas");
+        Assertions.assertEquals(unit.contains("atlas"), false);
     }
     
 

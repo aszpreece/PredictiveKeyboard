@@ -39,7 +39,10 @@ public class CLI {
      	
         try (BufferedReader fromUser = new BufferedReader(new InputStreamReader(System.in))) {
         	System.out.println(d.size());
-            
+        	System.out.println(d.numLeaves());
+        	System.out.println(d.height());
+        	System.out.println(d.maximumBranching());
+        	System.out.println(d.longestWord().length());
             for (int i = 0; i < 210; i++) {
             	Optional<String> out = d.predict(fromUser.readLine());
             	System.out.println(out.isPresent() ? out.get() : "No prediction");
