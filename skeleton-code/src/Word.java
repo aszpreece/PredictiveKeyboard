@@ -19,7 +19,7 @@ public class Word implements Comparable<Word>{
 
 	@Override
 	public int compareTo(Word w) {
-		return Integer.compare(popularity, w.getPopularity());
+		return Integer.compare(w.getPopularity(), popularity);
 	}
 	
 }

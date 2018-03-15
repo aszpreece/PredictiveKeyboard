@@ -6,8 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.BiFunction;
 
 public class DictionaryTree {
@@ -24,7 +22,7 @@ public class DictionaryTree {
 	}
 
 	private boolean setWord(int p) {
-		if (!popularity.isPresent() || popularity.get() > p) {
+		if (!popularity.isPresent() || popularity.get() < p) {
 			popularity = Optional.of(p);
 			return true;
 		}
@@ -39,7 +37,8 @@ public class DictionaryTree {
 	 *            the word to insert
 	 */
 	void insert(String word) {
-		insert(word, 0);
+		//just call other insert method with minimum value for popularity.
+		insert(word, Integer.MIN_VALUE);
 	}
 
 	/**
@@ -169,6 +168,7 @@ public class DictionaryTree {
 		List<Word> predictions = new ArrayList<Word>();
 		currentTree.allWordsRecur(prefix, predictions);
 		Collections.sort(predictions);
+		//for (Word w : predictions) System.out.println(w.getWord() + " " + w.getPopularity());
 		return wordToString(predictions).subList(0, n);
 	}
 
@@ -288,7 +288,7 @@ public class DictionaryTree {
 		return wordToString(words);
 	}
 
-	void allWordsRecur(String soFar, List<Word> words) {
+	private void allWordsRecur(String soFar, List<Word> words) {
 		if (isWord()) {
 			words.add(new Word(soFar, this.popularity.get()));
 		}

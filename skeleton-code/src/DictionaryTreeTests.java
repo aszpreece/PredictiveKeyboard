@@ -1,6 +1,5 @@
-import java.io.BufferedReader;
+
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,20 +14,6 @@ import org.junit.jupiter.api.Assertions;
 public class DictionaryTreeTests {
 
 	private static final String DICTIONARY_LOCATION = "word-popularity.txt";
-
-	static DictionaryTree loadWords(File f) throws IOException {
-		try (BufferedReader reader = new BufferedReader(new FileReader(f))) {
-			String word;
-			DictionaryTree d = new DictionaryTree();
-			int i = 1;
-			while ((word = reader.readLine()) != null) {
-				d.insert(word, i);
-				i++;
-			}
-
-			return d;
-		}
-	}
 
 	@Test
 	public void heightOfRootShouldBeZero() {
@@ -51,7 +36,6 @@ public class DictionaryTreeTests {
 		unit.insert("at");
 		unit.insert("atlas");
 		unit.insert("attention");
-		System.out.println(unit.size());
 		Assertions.assertEquals(unit.size(), 19);
 	}
 
@@ -115,7 +99,7 @@ public class DictionaryTreeTests {
 		unit.insert("atlas", 100);
 		unit.insert("attention", 0);
 		unit.insert("aty", 1);
-		Assertions.assertEquals(unit.predict("a").get(), "attention");
+		Assertions.assertEquals(unit.predict("a").get(), "at");
 	}
 
 	@Test
@@ -134,7 +118,7 @@ public class DictionaryTreeTests {
 	public void nPredict() {
 
 		try {
-			DictionaryTree unit = loadWords(new File(DICTIONARY_LOCATION));
+			DictionaryTree unit = CLI.loadWords(new File(DICTIONARY_LOCATION));
 			List<String> expected = new ArrayList<String>(
 					Arrays.asList("phone", "photo", "photos", "phones", "physical"));
 			List<String> actual = unit.predict("ph", 5);
@@ -150,8 +134,8 @@ public class DictionaryTreeTests {
 		DictionaryTree unit = new DictionaryTree();
 		unit.insert("hello", 10);
 		unit.insert("hey", 4);
-		Assertions.assertEquals(unit.predict("he"), "hey");
-		unit.insert("hello", 3);
-		Assertions.assertEquals(unit.predict("he"), "hello");
+		Assertions.assertEquals(unit.predict("he").get(), "hello");
+		unit.insert("hey", 12);
+		Assertions.assertEquals(unit.predict("he").get(), "hey");
 	}
 }

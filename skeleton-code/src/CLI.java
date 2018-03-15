@@ -3,6 +3,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -22,10 +24,17 @@ public class CLI {
         try (BufferedReader reader = new BufferedReader(new FileReader(f))) {
             String word;
             DictionaryTree d = new DictionaryTree();
-            int i = 1;
+       
+            List<String> words = new ArrayList<String>();
+            int total = 0;
             while ((word = reader.readLine()) != null) {
-                d.insert(word, i);
-                i++;
+                words.add(word);
+                total++;
+            }
+            int i = 0;
+            for (String w : words) {
+            	d.insert(w, total - i);
+            	i++;
             }
 
             return d;
