@@ -1,13 +1,11 @@
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.BiFunction;
@@ -73,12 +71,9 @@ public class DictionaryTree {
 				DictionaryTree newTree = new DictionaryTree();
 				currentTree.getChildren().put(word.charAt(i), newTree);
 				currentTree = newTree;
-				// System.out.println(currentTree.isWord());
 				i++;
 			}
 			currentTree.setWord(popularity);
-			// System.out.println("Added " + word + " last character " +
-			// word.charAt(i - 1));
 		}
 	}
 
@@ -313,7 +308,11 @@ public class DictionaryTree {
 	 * @return the result of folding the tree using f
 	 */
 	<A> A fold(BiFunction<DictionaryTree, Collection<A>, A> f) {
-		throw new RuntimeException("DictionaryTree.fold not implemented yet");
+		LinkedList<A> result = new LinkedList<A>();
+		for (DictionaryTree d : getChildren().values()) {
+			result.add(d.<A>fold(f));
+		}
+		return f.apply(this, result);	
 	}
 
 }
