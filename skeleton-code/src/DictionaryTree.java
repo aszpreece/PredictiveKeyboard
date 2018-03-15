@@ -24,7 +24,7 @@ public class DictionaryTree {
 	}
 
 	private boolean setWord(int p) {
-		if (!popularity.isPresent() || popularity.get() < p) {
+		if (!popularity.isPresent() || popularity.get() > p) {
 			popularity = Optional.of(p);
 			return true;
 		}
@@ -43,9 +43,8 @@ public class DictionaryTree {
 	}
 
 	/**
-	 * Inserts the given word into this dictionary with the given popularity. If
-	 * the word already exists, the popularity will be overriden by the given
-	 * value.
+	 * Inserts the given word into this dictionary with the given popularity. If the
+	 * word already exists, the popularity will be overriden by the given value.
 	 *
 	 * @param word
 	 *            the word to insert
@@ -78,9 +77,9 @@ public class DictionaryTree {
 	}
 
 	/**
-	 * Removes the specified word from this dictionary. Returns true if the
-	 * caller can delete this node without losing part of the dictionary, i.e.
-	 * if this node has no children after deleting the specified word.
+	 * Removes the specified word from this dictionary. Returns true if the caller
+	 * can delete this node without losing part of the dictionary, i.e. if this node
+	 * has no children after deleting the specified word.
 	 *
 	 * @param word
 	 *            the word to delete from this dictionary
@@ -114,8 +113,7 @@ public class DictionaryTree {
 	 *
 	 * @param word
 	 *            the word whose presence will be checked
-	 * @return true if the specified word is stored in this tree; false
-	 *         otherwise
+	 * @return true if the specified word is stored in this tree; false otherwise
 	 */
 	boolean contains(String word) {
 		assert (word != null);
@@ -136,8 +134,8 @@ public class DictionaryTree {
 	/**
 	 * @param prefix
 	 *            the prefix of the word returned
-	 * @return a word that starts with the given prefix, or an empty optional if
-	 *         no such word is found.
+	 * @return a word that starts with the given prefix, or an empty optional if no
+	 *         such word is found.
 	 */
 	Optional<String> predict(String prefix) {
 		List<String> p = predict(prefix, 1);
@@ -164,7 +162,7 @@ public class DictionaryTree {
 				currentTree = currentTree.getChildren().get(c);
 				i++;
 			} else {
-				//prefix has no words.
+				// prefix has no words.
 				return new ArrayList<String>();
 			}
 		}
@@ -175,75 +173,88 @@ public class DictionaryTree {
 	}
 
 	/**
-	 * @return the number of leaves in this tree, i.e. the number of words which
-	 *         are not prefixes of any other word.
+	 * @return the number of leaves in this tree, i.e. the number of words which are
+	 *         not prefixes of any other word.
 	 */
 	int numLeaves() {
-		return numLeavesRecur();
-	}
-
-	private int numLeavesRecur() {
-		int n = 0;
-		if (children.isEmpty() && isWord()) {
-			return 1;
-		} else {
-			for (char c : children.keySet()) {
-				n += children.get(c).numLeavesRecur();
+		BiFunction<DictionaryTree, Collection<Integer>, Integer> leaves = new BiFunction<DictionaryTree, Collection<Integer>, Integer>() {
+			
+			@Override
+			public Integer apply(DictionaryTree t, Collection<Integer> u) {
+				if (t.isWord() && t.getChildren().isEmpty()) {
+					return 1; 
+				} else {
+					int total = 0;
+					for (int i : u) {
+						total += i;
+					}
+					return total;
+				}
 			}
-			return n;
-		}
+
+		};
+		return (int) fold(leaves);
 	}
 
 	/**
 	 * @return the maximum number of children held by any node in this tree
 	 */
 	int maximumBranching() {
-		Queue<DictionaryTree> bfs = new LinkedBlockingQueue<DictionaryTree>();
-		bfs.add(this);
-		DictionaryTree currentTree;
-		int largest = children.size();
-		while (!bfs.isEmpty()) {
-			currentTree = bfs.poll();
-			if (currentTree.getChildren().keySet().size() > largest) {
-				largest = currentTree.getChildren().keySet().size();
+		BiFunction<DictionaryTree, Collection<Integer>, Integer> maxBranch = new BiFunction<DictionaryTree, Collection<Integer>, Integer>() {
+			
+			@Override
+			public Integer apply(DictionaryTree t, Collection<Integer> u) {
+				int mostBranches = t.getChildren().size();
+				for (int i : u) {
+					if (i > mostBranches) {
+						mostBranches = i;
+					}
+				}
+				return mostBranches;
 			}
-			for (DictionaryTree t : currentTree.getChildren().values()) {
-				bfs.add(t);
-			}
-		}
-		return largest;
+
+		};
+		return (int) fold(maxBranch);
 	}
 
 	/**
 	 * @return the height of this tree, i.e. the length of the longest branch
 	 */
 	int height() {
-		Queue<DictionaryTree> bfs = new LinkedBlockingQueue<DictionaryTree>();
-		bfs.add(this);
-		DictionaryTree currentTree;
-		int depth = -1;
-		while (true) {
-			if (bfs.isEmpty()) return depth;
-			int levelSize = bfs.size();
-			for (int i = 0;  i < levelSize; i++) {
-				currentTree = bfs.poll();
-				for (DictionaryTree t : currentTree.getChildren().values()) {
-					bfs.add(t);
+		BiFunction<DictionaryTree, Collection<Integer>, Integer> height = new BiFunction<DictionaryTree, Collection<Integer>, Integer>() {
+
+			@Override
+			public Integer apply(DictionaryTree t, Collection<Integer> u) {
+				int deepest = -1;
+				for (int i : u) {
+					if (i > deepest) {
+						deepest = i;
+					}
 				}
+				return deepest + 1;
 			}
-			depth++;
-		}
+
+		};
+		return (int) fold(height);
 	}
 
 	/**
 	 * @return the number of nodes in this tree
 	 */
 	int size() {
-		int size = 1;
-		for (DictionaryTree d : children.values()) {
-			size += d.size();
-		}
-		return size;
+		BiFunction<DictionaryTree, Collection<Integer>, Integer> size = new BiFunction<DictionaryTree, Collection<Integer>, Integer>() {
+
+			@Override
+			public Integer apply(DictionaryTree t, Collection<Integer> u) {
+				int total = 0;
+				for (int i : u) {
+					total += i;
+				}
+				return total + 1;
+			}
+
+		};
+		return (int) fold(size);
 	}
 
 	Map<Character, DictionaryTree> getChildren() {
@@ -253,18 +264,18 @@ public class DictionaryTree {
 	/**
 	 * @return the longest word in this tree
 	 */
-	String longestWord() {		
+	String longestWord() {
 		return longestWordRecur("");
 	}
-	
+
 	private String longestWordRecur(String prefix) {
 		String longest = "";
 		for (char c : children.keySet()) {
-			String current = children.get(c).longestWordRecur(c + "");	
+			String current = children.get(c).longestWordRecur(c + "");
 			if (current.length() > longest.length()) {
 				longest = current;
 			}
-		}	
+		}
 		return prefix + longest;
 	}
 
@@ -274,7 +285,7 @@ public class DictionaryTree {
 	List<String> allWords() {
 		List<Word> words = new LinkedList<Word>();
 		allWordsRecur("", words);
-		return wordToString(words);	
+		return wordToString(words);
 	}
 
 	void allWordsRecur(String soFar, List<Word> words) {
@@ -285,8 +296,8 @@ public class DictionaryTree {
 			children.get(c).allWordsRecur(soFar + c, words);
 		}
 	}
-	
-	List<String>wordToString(List<Word> words) {
+
+	List<String> wordToString(List<Word> words) {
 		List<String> strings = new LinkedList<String>();
 		for (Word w : words) {
 			strings.add(w.getWord());
@@ -296,13 +307,13 @@ public class DictionaryTree {
 
 	/**
 	 * Folds the tree using the given function. Each of this node's children is
-	 * folded with the same function, and these results are stored in a
-	 * collection, cResults, say, then the final result is calculated using
-	 * f.apply(this, cResults).
+	 * folded with the same function, and these results are stored in a collection,
+	 * cResults, say, then the final result is calculated using f.apply(this,
+	 * cResults).
 	 *
 	 * @param f
-	 *            the summarising function, which is passed the result of
-	 *            invoking the given function
+	 *            the summarising function, which is passed the result of invoking
+	 *            the given function
 	 * @param <A>
 	 *            the type of the folded value
 	 * @return the result of folding the tree using f
@@ -312,7 +323,7 @@ public class DictionaryTree {
 		for (DictionaryTree d : getChildren().values()) {
 			result.add(d.<A>fold(f));
 		}
-		return f.apply(this, result);	
+		return f.apply(this, result);
 	}
 
 }
