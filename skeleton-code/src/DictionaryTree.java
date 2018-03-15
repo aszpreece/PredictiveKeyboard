@@ -1,11 +1,14 @@
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.Stack;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.BiFunction;
 
@@ -92,12 +95,16 @@ public class DictionaryTree {
 		assert (word != null);
 		word = word.toLowerCase();
 		DictionaryTree currentTree = this;
-		DictionaryTree last; //this is the last node that we visited that could be deleted without removing any other words.
 		int i = 0;
 		while (i < word.length()) {
 			char c = word.charAt(i);
 			if (currentTree.getChildren().containsKey(c)) {
-				currentTree = currentTree.getChildren().get(c);
+				DictionaryTree nextTree = currentTree.getChildren().get(c);
+				if (nextTree.maximumBranching() <= 1) {
+					currentTree.getChildren().remove(c);
+					return true;
+				}
+				currentTree = nextTree;
 				i++;
 			} else {
 				return false;
@@ -162,13 +169,14 @@ public class DictionaryTree {
 				currentTree = currentTree.getChildren().get(c);
 				i++;
 			} else {
+				//prefix has no words.
 				return new ArrayList<String>();
 			}
 		}
-		List<String> predictions = new ArrayList<String>();
+		List<Word> predictions = new ArrayList<Word>();
 		currentTree.allWordsRecur(prefix, predictions);
-		// sort predictions.
-		return predictions.subList(0, n);
+		Collections.sort(predictions);
+		return wordToString(predictions).subList(0, n);
 	}
 
 	/**
@@ -198,7 +206,7 @@ public class DictionaryTree {
 		Queue<DictionaryTree> bfs = new LinkedBlockingQueue<DictionaryTree>();
 		bfs.add(this);
 		DictionaryTree currentTree;
-		int largest = 0;
+		int largest = children.size();
 		while (!bfs.isEmpty()) {
 			currentTree = bfs.poll();
 			if (currentTree.getChildren().keySet().size() > largest) {
@@ -265,23 +273,30 @@ public class DictionaryTree {
 		return prefix + longest;
 	}
 
-
 	/**
 	 * @return all words stored in this tree as a list
 	 */
 	List<String> allWords() {
-		List<String> words = new ArrayList<String>();
+		List<Word> words = new LinkedList<Word>();
 		allWordsRecur("", words);
-		return words;
+		return wordToString(words);	
 	}
 
-	void allWordsRecur(String soFar, List<String> words) {
+	void allWordsRecur(String soFar, List<Word> words) {
 		if (isWord()) {
-			words.add(soFar);
+			words.add(new Word(soFar, this.popularity.get()));
 		}
 		for (Character c : children.keySet()) {
 			children.get(c).allWordsRecur(soFar + c, words);
 		}
+	}
+	
+	List<String>wordToString(List<Word> words) {
+		List<String> strings = new LinkedList<String>();
+		for (Word w : words) {
+			strings.add(w.getWord());
+		}
+		return strings;
 	}
 
 	/**

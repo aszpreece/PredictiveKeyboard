@@ -22,8 +22,10 @@ public class CLI {
         try (BufferedReader reader = new BufferedReader(new FileReader(f))) {
             String word;
             DictionaryTree d = new DictionaryTree();
+            int i = 1;
             while ((word = reader.readLine()) != null) {
-                d.insert(word);
+                d.insert(word, i);
+                i++;
             }
 
             return d;
