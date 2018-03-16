@@ -138,4 +138,19 @@ public class DictionaryTreeTests {
 		unit.insert("hey", 12);
 		Assertions.assertEquals(unit.predict("he").get(), "hey");
 	}
+	
+	@Test
+	public void wordOverwrite() {
+		DictionaryTree unit = new DictionaryTree();
+		unit.insert("hello", 10);
+		unit.insert("he", 4);
+		Assertions.assertEquals(unit.contains("he"), true);
+		Assertions.assertEquals(unit.contains("hello"), true);
+	}
+	
+	@Test(expected = AssertionError.class)
+	public void testEntries() {
+		DictionaryTree unit = new DictionaryTree();
+		unit.insert(null, 10);
+	}
 }

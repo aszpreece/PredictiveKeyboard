@@ -36,7 +36,7 @@ public class CLI {
             	d.insert(w, total - i);
             	i++;
             }
-
+            
             return d;
         }
     }

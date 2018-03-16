@@ -11,16 +11,31 @@ import java.util.function.BiFunction;
 public class DictionaryTree {
 
 	private Map<Character, DictionaryTree> children = new LinkedHashMap<>();
+	// empty popularity value indicates the node is not the end of a word.
 	Optional<Integer> popularity = Optional.empty();
-
+	
+	/**
+	 * @return if the node signals the end of a word.
+	 */
 	private boolean isWord() {
 		return popularity.isPresent();
 	}
 
+	/**
+	 * Stops a node from being the end of a word.
+	 */
 	private void removeWord() {
 		popularity = Optional.empty();
 	}
 
+	/**
+	 * Sets a node to be a word with the given popularity. Overwrites old popularity
+	 * value of given value is bigger.
+	 * 
+	 * @param p
+	 *            the popularity of the word
+	 * @return if the popularity was overwritten.
+	 */
 	private boolean setWord(int p) {
 		if (!popularity.isPresent() || popularity.get() < p) {
 			popularity = Optional.of(p);
@@ -37,7 +52,7 @@ public class DictionaryTree {
 	 *            the word to insert
 	 */
 	void insert(String word) {
-		//just call other insert method with minimum value for popularity.
+		// just call other insert method with minimum value for popularity.
 		insert(word, Integer.MIN_VALUE);
 	}
 
@@ -57,22 +72,23 @@ public class DictionaryTree {
 		int i = 0;
 		while (i < word.length()) {
 			char c = word.charAt(i);
-			if (currentTree.getChildren().containsKey(c)) {
+			if (currentTree.getChildren().containsKey(c)) { // if the next character is in the tree move to that node.
 				currentTree = currentTree.getChildren().get(c);
 				i++;
-			} else {
+			} else { // if not then we need to create these nodes.
 				break;
 			}
 		}
-		if (i <= word.length()) {
-			while (i < word.length()) {
-				DictionaryTree newTree = new DictionaryTree();
-				currentTree.getChildren().put(word.charAt(i), newTree);
-				currentTree = newTree;
-				i++;
-			}
-			currentTree.setWord(popularity);
+		// create extra nodes and set the last node to be the end of the word.
+
+		while (i < word.length()) {
+			DictionaryTree newTree = new DictionaryTree();
+			currentTree.getChildren().put(word.charAt(i), newTree);
+			currentTree = newTree;
+			i++;
 		}
+		currentTree.setWord(popularity);
+
 	}
 
 	/**
@@ -168,7 +184,8 @@ public class DictionaryTree {
 		List<Word> predictions = new ArrayList<Word>();
 		currentTree.allWordsRecur(prefix, predictions);
 		Collections.sort(predictions);
-		//for (Word w : predictions) System.out.println(w.getWord() + " " + w.getPopularity());
+		// for (Word w : predictions) System.out.println(w.getWord() + " " +
+		// w.getPopularity());
 		return wordToString(predictions).subList(0, n);
 	}
 
@@ -178,11 +195,11 @@ public class DictionaryTree {
 	 */
 	int numLeaves() {
 		BiFunction<DictionaryTree, Collection<Integer>, Integer> leaves = new BiFunction<DictionaryTree, Collection<Integer>, Integer>() {
-			
+
 			@Override
 			public Integer apply(DictionaryTree t, Collection<Integer> u) {
 				if (t.isWord() && t.getChildren().isEmpty()) {
-					return 1; 
+					return 1;
 				} else {
 					int total = 0;
 					for (int i : u) {
@@ -201,7 +218,7 @@ public class DictionaryTree {
 	 */
 	int maximumBranching() {
 		BiFunction<DictionaryTree, Collection<Integer>, Integer> maxBranch = new BiFunction<DictionaryTree, Collection<Integer>, Integer>() {
-			
+
 			@Override
 			public Integer apply(DictionaryTree t, Collection<Integer> u) {
 				int mostBranches = t.getChildren().size();
@@ -235,7 +252,7 @@ public class DictionaryTree {
 			}
 
 		};
-		return (int) fold(height);
+		return (int)fold(height);
 	}
 
 	/**
@@ -257,7 +274,7 @@ public class DictionaryTree {
 		return (int) fold(size);
 	}
 
-	Map<Character, DictionaryTree> getChildren() {
+	private Map<Character, DictionaryTree> getChildren() {
 		return children;
 	}
 
@@ -289,18 +306,20 @@ public class DictionaryTree {
 	}
 
 	private void allWordsRecur(String soFar, List<Word> words) {
+		//If the node is the end of a word add the complete word to the list
 		if (isWord()) {
 			words.add(new Word(soFar, this.popularity.get()));
 		}
+		//carry on the recursion.
 		for (Character c : children.keySet()) {
 			children.get(c).allWordsRecur(soFar + c, words);
 		}
 	}
 
-	List<String> wordToString(List<Word> words) {
+	private List<String> wordToString(List<Word> words) {
 		List<String> strings = new LinkedList<String>();
 		for (Word w : words) {
-			strings.add(w.getWord());
+			strings.add(w.word);
 		}
 		return strings;
 	}
@@ -320,10 +339,29 @@ public class DictionaryTree {
 	 */
 	<A> A fold(BiFunction<DictionaryTree, Collection<A>, A> f) {
 		LinkedList<A> result = new LinkedList<A>();
+		//create list of folded results of the children
 		for (DictionaryTree d : getChildren().values()) {
 			result.add(d.<A>fold(f));
 		}
+		//apply the function to this node.
 		return f.apply(this, result);
 	}
+	
+	private class Word implements Comparable<Word>{
+			
+			public String word;
+			public int popularity;
+			
+			public Word(String word, int popularity) {
+				this.word = word;
+				this.popularity = popularity;
+			}
+
+			@Override
+			public int compareTo(Word w) {
+				return Integer.compare(w.popularity, popularity);
+			}
+			
+		}
 
 }
