@@ -1,5 +1,7 @@
 ## Solution
 
+git: https://git.cs.bham.ac.uk/tap747/WordPopularity.git
+
 I used a mix of iterative and recursive approaches to solve the task. This was so I could show off BFS traversal and that I am able to use both techniques. It is quite a contensious topic as to which style is better, recursive often being more elegant but at the risk of decreased performance in some enviroments and stack overflows. Recursive functions are also harder to maintain as they are often more difficult to understand.
 
 To signal the end of a word, the node will have an optional type called popularity. If this has a value then it signals the end of a word, if it is empty it is just a regular node. An alternative approach could have been to have a special symbol or node that would signal the end of a word that would be the child of the last letter of a word, but this would have taken up more memory and would have made popularity based searching harder to implement.
